@@ -10,4 +10,12 @@ class ContactCenterRegistryApplicationTests {
 	void contextLoads() {
 	}
 
+	@Test
+	void mainStartsNonWebContext() {
+		ContactCenterRegistryApplication.main(new String[] {
+			"--spring.main.web-application-type=none",
+			"--spring.main.lazy-initialization=true"
+		});
+	}
+
 }

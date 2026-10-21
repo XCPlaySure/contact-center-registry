@@ -40,7 +40,7 @@ The service is a REST API backed by PostgreSQL, with schema managed by Flyway an
 | Validation | Jakarta Bean Validation (Hibernate Validator) |
 | Ops | Spring Boot Actuator, graceful shutdown |
 | Build | Apache Maven 3.10 (via `mvnw` wrapper) |
-| Tests | JUnit 5, Mockito, Spring Boot test starters |
+| Tests | JUnit 5, Mockito, Spring Boot test starters, JaCoCo (100% line/branch gate) |
 | Container | Docker, `eclipse-temurin` base image |
 | CI | GitHub Actions (`./mvnw -B verify` on push/PR) |
 | Dev tooling | Spring Boot DevTools |
@@ -90,6 +90,8 @@ The API listens on `http://localhost:8080`.
 ```bash
 ./mvnw verify
 ```
+
+`verify` also enforces **100% line and branch coverage** via the JaCoCo `check` goal (HTML report: `target/site/jacoco/index.html`). Every `com.exercise.registry` class except the Spring Boot main class must stay fully covered; a coverage regression fails the build.
 
 > `ContactCenterRegistryApplicationTests` boots the full application context (including Flyway), so PostgreSQL must be reachable at `localhost:5432` for `./mvnw verify` to pass. Note that `.github/workflows/ci.yml` does not currently define a Postgres service, so the pipeline needs one added before `./mvnw -B verify` can go green on a clean runner.
 
@@ -208,8 +210,16 @@ contact-center-registry/
     │           ├── V1__create_tenants.sql              # tenants table
     │           └── V2__create_integrations.sql         # integrations table + index/constraints
     └── test/java/com/exercise/registry/
-        ├── ContactCenterRegistryApplicationTests.java  # Context load smoke test
-        └── integration/IntegrationServiceTest.java     # Mockito unit test
+        ├── ContactCenterRegistryApplicationTests.java  # Context load + main() smoke test
+        ├── common/GlobalExceptionHandlerTest.java      # Every error handler + edge cases
+        ├── tenant/
+        │   ├── TenantTest.java                         # Entity + response mapping
+        │   ├── TenantServiceTest.java                  # Create/get/duplicate/missing
+        │   └── TenantControllerTest.java               # MockMvc: 201/200/400/404
+        └── integration/
+            ├── IntegrationTest.java                    # Entity, update(), response mapping
+            ├── IntegrationServiceTest.java             # Full CRUD + paging + conflicts
+            └── IntegrationControllerTest.java          # MockMvc: all endpoints + 400/404/409
 ```
 
 Package layout follows a feature-first (bounded-context) structure: `tenant` and `integration` each hold their own entity, repository, service, controller, and request/response records, while `common` holds the shared error contract.
