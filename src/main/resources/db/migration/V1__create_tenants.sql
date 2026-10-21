@@ -1,0 +1,6 @@
+CREATE TABLE tenants (
+    id UUID PRIMARY KEY,
+    name VARCHAR(120) NOT NULL,
+    slug VARCHAR(60) NOT NULL UNIQUE,
+    created_at TIMESTAMPTZ NOT NULL
+);
