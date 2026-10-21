@@ -93,7 +93,7 @@ The API listens on `http://localhost:8080`.
 
 `verify` also enforces **100% line and branch coverage** via the JaCoCo `check` goal (HTML report: `target/site/jacoco/index.html`). Every `com.exercise.registry` class except the Spring Boot main class must stay fully covered; a coverage regression fails the build.
 
-> `ContactCenterRegistryApplicationTests` boots the full application context (including Flyway), so PostgreSQL must be reachable at `localhost:5432` for `./mvnw verify` to pass. Note that `.github/workflows/ci.yml` does not currently define a Postgres service, so the pipeline needs one added before `./mvnw -B verify` can go green on a clean runner.
+> `ContactCenterRegistryApplicationTests` boots the full application context (including Flyway), so PostgreSQL must be reachable at `localhost:5432` for `./mvnw verify` to pass. CI (`.github/workflows/ci.yml`) provisions a `postgres:16` service with the same default credentials.
 
 ### 4. Build a JAR and container image
 
